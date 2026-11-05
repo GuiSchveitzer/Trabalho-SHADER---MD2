@@ -1,0 +1,32 @@
+#version 330 core
+
+// Vertex shader do MD2: recebe dois keyframes (posicao + normal de cada)
+// e calcula o vertice intermediario na GPU, sem reenviar nada pelo Java.
+
+in vec3 posFrame1;    // att 0 - posicao no keyframe atual
+in vec3 normalFrame1; // att 2 - normal no keyframe atual
+in vec2 textuv;       // att 3 - coordenada de textura (igual em todos os frames)
+in vec3 posFrame2;    // att 4 - posicao no proximo keyframe
+in vec3 normalFrame2; // att 5 - normal no proximo keyframe
+
+uniform mat4 model;
+uniform mat4 view;
+uniform float interp; // 0..1 entre os dois keyframes
+
+out vec3 norm;
+out vec2 uv;
+
+void main(void){
+	// Interpolacao linear entre os keyframes: p = a + interp * (b - a)
+	vec3 pos = mix(posFrame1, posFrame2, interp);
+	vec3 n = mix(normalFrame1, normalFrame2, interp);
+
+	// As matrizes chegam transpostas do Java (storeTranspose), por isso o vetor vem antes: vetor * matriz.
+	// O z e multiplicado por -0.1 para caber no volume de recorte e para o lado +z ficar mais perto
+	// da camera; com +0.1 o modelo aparece espelhado (a arma troca de mao).
+	gl_Position = (vec4(pos,1.0)*model*view)*vec4(1,1,-0.1,1);
+
+	// Normal no espaco do mundo (w = 0 ignora a translacao; a escala e uniforme, entao basta normalizar)
+	norm = normalize((vec4(n,0.0)*model).xyz);
+	uv = textuv;
+}

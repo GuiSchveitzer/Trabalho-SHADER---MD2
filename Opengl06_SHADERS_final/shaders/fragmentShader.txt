@@ -1,0 +1,29 @@
+#version 330 core
+
+// Fragment shader do MD2: textura + iluminacao difusa (Lambert) calculada por pixel.
+
+uniform sampler2D tex;
+uniform vec3 luzDir;        // direcao para a luz, no espaco do mundo
+uniform int mostrarNormais; // 1 = pinta a normal como cor (para conferir as normais)
+
+in vec3 norm;
+in vec2 uv;
+
+out vec4 out_Color;
+
+void main(void){
+	vec3 n = normalize(norm); // a interpolacao entre vertices tira a normal do tamanho 1
+
+	if (mostrarNormais == 1) {
+		out_Color = vec4(n*0.5 + 0.5, 1.0); // -1..1 -> 0..1
+		return;
+	}
+
+	// Lambert: intensidade = cos do angulo entre normal e luz (dot de vetores unitarios).
+	// O ambiente baixo (0.15) deixa o lado sem luz bem mais escuro, para o efeito aparecer.
+	float difusa = max(dot(n, normalize(luzDir)), 0.0);
+	float luz = 0.15 + 0.95*difusa;
+
+	vec4 cortex = texture(tex, uv);
+	out_Color = vec4(cortex.rgb*luz, cortex.a);
+}
