@@ -19,7 +19,8 @@ out vec2 uv;
 void main(void){
 	// Interpolacao linear entre os keyframes: p = a + interp * (b - a)
 	vec3 pos = mix(posFrame1, posFrame2, interp);
-	vec3 n = mix(normalFrame1, normalFrame2, interp);
+	vec3 n = normalize(mix(normalFrame1, normalFrame2, interp));
+	// É bom normalizar a normal interpolada porque a interpolação pode produzir um vetor cujo comprimento não seja 1
 
 	// As matrizes chegam transpostas do Java (storeTranspose), por isso o vetor vem antes: vetor * matriz.
 	// O z e multiplicado por -0.1 para caber no volume de recorte e para o lado +z ficar mais perto

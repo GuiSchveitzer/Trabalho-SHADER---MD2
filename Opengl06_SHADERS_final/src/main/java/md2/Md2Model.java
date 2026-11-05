@@ -113,14 +113,15 @@ public class Md2Model extends Model {
 			int posVertices = pos + 40;
 			for (int v = 0; v < numVertices; v++) {
 				for (int c = 0; c < 3; c++) {
-					int valor = buf.get(posVertices + v * 4 + c) & 0xFF;
+					int valor = buf.get(posVertices + v * 4 + c) & 0xFF; //
 					verticesFrame[v * 3 + c] = valor * escala[c] + translacao[c];
 				}
 				int indNormal = buf.get(posVertices + v * 4 + 3) & 0xFF;
 				float[] n = Anorms.NORMAIS[Math.min(indNormal, Anorms.NORMAIS.length - 1)];
 				// A tabela do Quake está girada 90° em Z em relação aos vértices: usando (-y, x, z)
-				// a normal coincide com a calculada pela geometria (testado nos MD2 do pacote).
-				// O Quake 2 não percebe isso porque ilumina por tabelas indexadas pelo ângulo do modelo.
+				// Se utilizasse as normais (x,y,z) podem ficar trocadas, geometricamente aponta para um lado 
+				// e a normal aponta para o outro, por isso do cálculo abaixo, para corrigir isso
+				//OBS: Não está criando nada novo, só convertendo a normal para o nosso sistema de coordenadas
 				normaisFrame[v * 3] = -n[1];
 				normaisFrame[v * 3 + 1] = n[0];
 				normaisFrame[v * 3 + 2] = n[2];
